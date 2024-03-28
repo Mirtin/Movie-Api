@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from rest_framework.pagination import PageNumberPagination 
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from .models import MovieModel
 
@@ -18,3 +18,10 @@ class MovieListView(ListAPIView):
     queryset = MovieModel.objects.all()
     serializer_class = MovieSerializer
     pagination_class = MoviePagination
+
+
+
+class MovieView(RetrieveAPIView):
+    serializer_class = MovieSerializer
+    lookup_field = 'title'
+    queryset = MovieModel.objects.all()
