@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\hack5\OneDrive\Рабочий стол\Programming\Visual_Studio\VisualStudioProjects\Movie-App\venv"
+VIRTUAL_ENV="C:\Users\hack5\OneDrive\Рабочий стол\Programming\Visual_Studio\VisualStudioProjects\Movie-Api\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
