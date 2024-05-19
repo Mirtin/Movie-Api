@@ -1,5 +1,6 @@
 from django.http import HttpResponse, FileResponse
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -9,6 +10,8 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 from .models import MovieModel, RatingModel
 
 from .serializers import MovieSerializer
+
+from .config import SECRET_KEY
 
 
 class MoviePagination(PageNumberPagination):
@@ -30,8 +33,13 @@ class MovieView(RetrieveAPIView):
     queryset = MovieModel.objects.all()
 
 
+
+
+
+
+
 def imagePage(request, image_title):
-    image_data = open(f"api/images/{image_title}", "rb").read()
+    image_data = open(f"api/images/{image_title}", "rb")
     
     return HttpResponse(image_data, content_type="image/png")
 
@@ -49,13 +57,32 @@ def trailerPage(request, trailer_title):
 
 @api_view(['GET'])
 def getAverageRating(request, title):
-    average_rating = RatingModel.objects.filter(movie__title=title).aggregate(avg_rating=Avg('rating'))
-    if average_rating['avg_rating'] is not None:
+    movie_title = get_object_or_404(MovieModel, title=title)
+    average_rating = RatingModel.objects.filter(movie__title=movie_title).aggregate(average_rating=Avg('rating'))
+    if average_rating['average_rating'] is not None:
         response = {
-            'average_rating': average_rating['avg_rating']
+            'average_rating': average_rating['average_rating']
         }
     else:
         response = {
             'message': 'No ratings yet for this movie.'
         }
+    return Response(response)
+
+
+@api_view(['POST'])
+def rateMovie(request, title):
+    user = request.POST.get('user', None)
+    rating = float(request.POST.get('rating', None))
+    secret_key = request.POST.get('secret_key', None)
+    print(user, rating, secret_key)
+    if secret_key == SECRET_KEY and RatingModel.is_value_in_rating_choices(rating):
+        movie_title = get_object_or_404(MovieModel, title=title)
+        if RatingModel.objects.filter(movie=movie_title, user=user):
+            RatingModel.objects.filter(movie=movie_title, user=user).delete()
+        RatingModel.objects.create(movie=movie_title, user=user, rating=rating)
+
+        response = {"msg": 'Object created'}
+    else:
+        response = {"msg": 'Wrong params'}
     return Response(response)

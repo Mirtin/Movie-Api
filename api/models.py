@@ -42,6 +42,15 @@ class RatingModel(models.Model):
         (EXCELLENT, 'Excellent'),
         (EXCELLENT_PLUS, 'Excellent+'),
     ]
+
+    @classmethod
+    def is_value_in_rating_choices(cls, value):
+        for rating in cls.RATING_CHOICES:
+            if rating[0] == value:
+                return True
+            print(value, rating[0])
+        return False
+
     rating = models.DecimalField(choices=RATING_CHOICES, max_digits=2, decimal_places=1)
     user = models.CharField(max_length=10)
     def __str__(self) -> str:
