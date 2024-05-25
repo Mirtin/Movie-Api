@@ -1,6 +1,7 @@
 from django.http import HttpResponse, FileResponse
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -72,10 +73,9 @@ def getAverageRating(request, title):
 
 @api_view(['POST'])
 def rateMovie(request, title):
-    user = request.POST.get('user', None)
-    rating = float(request.POST.get('rating', None))
-    secret_key = request.POST.get('secret_key', None)
-    print(user, rating, secret_key)
+    user = request.data.get('user', None)
+    rating = float(request.data.get('rating', 0))
+    secret_key = request.data.get('secret_key', None)
     if secret_key == SECRET_KEY and RatingModel.is_value_in_rating_choices(rating):
         movie_title = get_object_or_404(MovieModel, title=title)
         if RatingModel.objects.filter(movie=movie_title, user=user):
@@ -84,5 +84,10 @@ def rateMovie(request, title):
 
         response = {"msg": 'Object created'}
     else:
-        response = {"msg": 'Wrong params'}
+        response = {"msg": 'Wrong params',
+                    "params": {
+                        "user": user,
+                        "rating": rating,
+                        "title": title,
+                    }}
     return Response(response)
