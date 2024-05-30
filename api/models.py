@@ -54,4 +54,4 @@ class RatingModel(models.Model):
     rating = models.DecimalField(choices=RATING_CHOICES, max_digits=2, decimal_places=1)
     user = models.CharField(max_length=10)
     def __str__(self) -> str:
-        return self.movie.title
+        return f"{self.movie.title} {self.user} {self.rating}"
