@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -52,6 +53,6 @@ class RatingModel(models.Model):
         return False
 
     rating = models.DecimalField(choices=RATING_CHOICES, max_digits=2, decimal_places=1)
-    user = models.CharField(max_length=10)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     def __str__(self) -> str:
         return f"{self.movie.title} {self.user} {self.rating}"

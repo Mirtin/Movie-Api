@@ -1,7 +1,7 @@
 from django.http import HttpResponse, FileResponse
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -25,14 +25,14 @@ class MovieListView(ListAPIView):
     queryset = MovieModel.objects.all()
     serializer_class = MovieSerializer
     pagination_class = MoviePagination
-
+    permission_classes = (AllowAny,)
 
 
 class MovieView(RetrieveAPIView):
     serializer_class = MovieSerializer
     lookup_field = "title"
     queryset = MovieModel.objects.all()
-
+    permission_classes = (AllowAny,)
 
 
 
