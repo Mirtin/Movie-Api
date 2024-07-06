@@ -7,5 +7,6 @@ urlpatterns = [
     path('images/<str:image_title>/', views.imagePage),
     path('trailers/<str:trailer_title>/', views.trailerPage),
     path('average_rating/<str:title>/', views.getAverageRating),
-    path('ratemovie/<str:title>/', views.rateMovie),
+    path('rate_movie/<str:title>/', views.rateMovie),
+    path('rated_movies/', views.getRatedMovies),
 ]

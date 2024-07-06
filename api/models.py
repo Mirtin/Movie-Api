@@ -49,7 +49,6 @@ class RatingModel(models.Model):
         for rating in cls.RATING_CHOICES:
             if rating[0] == value:
                 return True
-            print(value, rating[0])
         return False
 
     rating = models.DecimalField(choices=RATING_CHOICES, max_digits=2, decimal_places=1)

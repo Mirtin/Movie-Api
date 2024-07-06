@@ -1,10 +1,12 @@
 from django.http import HttpResponse, FileResponse
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth.models import User
 
+from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.pagination import PageNumberPagination 
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
@@ -74,21 +76,35 @@ def getAverageRating(request, title):
 
 @api_view(["POST"])
 def rateMovie(request, title):
-    user = request.data.get('user', None)
+    user = request.user
     rating = float(request.data.get("rating", 0))
-    secret_key = request.data.get("secret_key", None)
-    if secret_key == SECRET_KEY and RatingModel.is_value_in_rating_choices(rating):
-        movie_title = get_object_or_404(MovieModel, title=title)
-        if RatingModel.objects.filter(movie=movie_title, user=user):
-            RatingModel.objects.filter(movie=movie_title, user=user).delete()
-        RatingModel.objects.create(movie=movie_title, user=user, rating=rating)
-
-        response = {"msg": 'Object created'}
+    
+    try:
+        movie = MovieModel.objects.get(title=title)
+    except MovieModel.DoesNotExist:
+        return Response({"msg": "Movie not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    if RatingModel.is_value_in_rating_choices(rating):
+        RatingModel.objects.update_or_create(movie=movie, user=user, defaults={"rating": rating})
+        response = {"msg": "Rating created/updated"}
+        return Response(response, status=status.HTTP_201_CREATED)
     else:
-        response = {"msg": 'Wrong params',
-                    "params": {
-                        "user": user,
-                        "rating": rating,
-                        "title": title,
-                    }}
+        response = {
+            "msg": "Invalid rating value",
+            "data": {
+                "rating": rating,
+                "title": title,
+            }
+        }
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(["GET"])
+def getRatedMovies(request):
+    user = request.user
+    print(user, ' the user')
+    rated_movies = RatingModel.objects.filter(user=user)
+    response = {"rate_movies": rated_movies}
     return Response(response)
+
