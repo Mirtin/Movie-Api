@@ -8,5 +8,5 @@ urlpatterns = [
     path('trailers/<str:trailer_title>/', views.trailerPage),
     path('average_rating/<str:title>/', views.getAverageRating),
     path('rate_movie/<str:title>/', views.rateMovie),
-    path('rated_movies/', views.getRatedMovies),
+    path('rated_movie/', views.RatedMovieView.as_view()),
 ]

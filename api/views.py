@@ -12,9 +12,7 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from .models import MovieModel, RatingModel
 
-from .serializers import MovieSerializer
-
-from .config import SECRET_KEY
+from .serializers import MovieSerializer, RatingSerializer
 
 
 class MoviePagination(PageNumberPagination):
@@ -37,6 +35,13 @@ class MovieView(RetrieveAPIView):
     permission_classes = (AllowAny,)
 
 
+class RatedMovieView(ListAPIView):
+    serializer_class = RatingSerializer
+    def get_queryset(self):
+        user = self.request.user
+        queryset = RatingModel.objects.filter(user=user)
+
+        return queryset
 
 
 
@@ -97,14 +102,3 @@ def rateMovie(request, title):
             }
         }
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-@api_view(["GET"])
-def getRatedMovies(request):
-    user = request.user
-    print(user, ' the user')
-    rated_movies = RatingModel.objects.filter(user=user)
-    response = {"rate_movies": rated_movies}
-    return Response(response)
-
