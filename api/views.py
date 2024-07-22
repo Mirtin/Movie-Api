@@ -8,11 +8,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination 
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
 
-from .models import MovieModel, RatingModel
+from .models import MovieModel, RatingModel, SavedMovieModel
 
-from .serializers import MovieSerializer, RatingSerializer
+from .serializers import MovieSerializer, RatingSerializer, SavedMoviesSerializer
 
 
 class MoviePagination(PageNumberPagination):
@@ -68,7 +68,7 @@ def trailerPage(request, trailer_title):
 def getAverageRating(request, title):
     movie_title = get_object_or_404(MovieModel, title=title)
     average_rating = RatingModel.objects.filter(movie__title=movie_title).aggregate(average_rating=Avg("rating"))
-    if average_rating['average_rating'] is not None:
+    if average_rating["average_rating"] is not None:
         response = {
             "average_rating": average_rating["average_rating"]
         }
@@ -87,18 +87,55 @@ def rateMovie(request, title):
     try:
         movie = MovieModel.objects.get(title=title)
     except MovieModel.DoesNotExist:
-        return Response({"msg": "Movie not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"msg": 'Movie not found'}, status=status.HTTP_404_NOT_FOUND)
     
     if RatingModel.is_value_in_rating_choices(rating):
         RatingModel.objects.update_or_create(movie=movie, user=user, defaults={"rating": rating})
-        response = {"msg": "Rating created/updated"}
+        response = {"msg": 'Rating created/updated'}
         return Response(response, status=status.HTTP_201_CREATED)
     else:
         response = {
-            "msg": "Invalid rating value",
+            "msg": 'Invalid rating value',
             "data": {
                 "rating": rating,
                 "title": title,
             }
         }
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SavedMovieView(ListAPIView):
+    serializer_class = SavedMoviesSerializer
+    def get_queryset(self):
+        user = self.request.user
+        queryset = SavedMovieModel.objects.filter(user=user)
+
+        return queryset
+
+
+@api_view(["POST"])
+def addToSaved(request, title):
+    user = request.user
+
+    if SavedMovieModel.objects.filter(user=user, movie__title=title).exists():
+        response = {
+            "msg": 'The movie is already saved'
+        }
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        movie = get_object_or_404(MovieModel.objects.filter(title=title))
+        SavedMovieModel.objects.create(user=user, movie=movie)
+        response = {"msg": 'The movie is saved'}
+        return Response(response, status=status.HTTP_201_CREATED)
+    
+
+@api_view(["POST"])
+def removeFromSaved(request, title):
+    user = request.user
+    
+    saved_movie = get_object_or_404(SavedMovieModel.objects.filter(user=user, movie__title=title))
+    saved_movie.delete()
+
+    response = {"msg": 'The movie was unsaved'}
+
+    return Response(response, status=status.HTTP_200_OK)
