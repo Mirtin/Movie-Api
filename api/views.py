@@ -139,3 +139,18 @@ def removeFromSaved(request, title):
     response = {"msg": 'The movie was unsaved'}
 
     return Response(response, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def isSaved(request, title):
+    movie = get_object_or_404(MovieModel.objects.filter(title=title))
+    user = request.user
+
+    if SavedMovieModel.objects.filter(user=user, movie=movie).exists():
+        response = {"IsSaved": True}
+        return Response(response, status=status.HTTP_200_OK)
+    else:
+        response = {"IsSaved": False}
+        return Response(response, status=status.HTTP_200_OK)
+
+    
