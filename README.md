@@ -9,6 +9,7 @@ This backend contains data and endpoint for [Movie App](https://github.com/Mirti
 
 
 ![Screenshot 2024-07-31 203816](https://github.com/user-attachments/assets/4ae4c147-3d8e-43f0-98f4-2214b5bc1847)
+ 
 ![Screenshot 2024-07-31 200751](https://github.com/user-attachments/assets/fb0cd7b1-002b-4675-89fc-20dfc91801bb)
 
 ## How to run project
