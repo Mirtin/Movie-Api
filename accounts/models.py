@@ -1,12 +1,16 @@
 from django.db import models
-from django.contrib.auth.models import User
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
 
 class ProfileModel(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    avatar = models.ImageField(upload_to="accounts/user/avatar")
+    avatar = models.ImageField(upload_to="accounts/user/avatar", default=None)
 
     def save(self, *args, **kwargs):
         if self.avatar:
@@ -27,3 +31,11 @@ class ProfileModel(models.Model):
         return f"{self.user.username}'s Profile"
 
 
+@receiver(post_save, sender=User)
+def manage_user_profile(sender, instance, created, **kwargs):
+    if created:
+        ProfileModel.objects.create(user=instance)
+    else:
+        user_profile, created = ProfileModel.objects.get_or_create(user=instance)
+        if not created:
+            user_profile.save()
