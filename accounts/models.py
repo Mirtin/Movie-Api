@@ -1,11 +1,11 @@
 from django.db import models
-from PIL import Image
-from io import BytesIO
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+import os
+from PIL import Image
+from io import BytesIO
 
 
 class ProfileModel(models.Model):
@@ -13,6 +13,13 @@ class ProfileModel(models.Model):
     avatar = models.ImageField(upload_to="accounts/user/avatar", default=None)
 
     def save(self, *args, **kwargs):
+
+        if self.pk:
+            old_avatar = ProfileModel.objects.get(pk=self.pk).avatar
+            if old_avatar and old_avatar != self.avatar:
+                if os.path.isfile(old_avatar.path):
+                    os.remove(old_avatar.path)
+
         if self.avatar:
             img = Image.open(self.avatar)
 

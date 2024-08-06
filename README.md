@@ -20,6 +20,10 @@ pip -r requirements.txt
 step 2: Add dependencies
 You need to create `.env` file and add `SECRET_KEY` variable.
 
+step 3: Run Project
+```sh
+py manage.py runserver
+```
 
 P.S
 Do not forget that the default permission class is `IsAuthenticated`.
