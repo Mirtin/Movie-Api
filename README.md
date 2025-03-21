@@ -27,7 +27,3 @@ py manage.py runserver
 
 P.S
 Do not forget that the default permission class is `IsAuthenticated`.
-
-## Authors
-
-- [@Mirtin](https://www.github.com/Mirtin)
